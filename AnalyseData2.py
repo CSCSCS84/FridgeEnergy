@@ -7,7 +7,7 @@ import seaborn as sns
 #sns.set()
 
 filenameTrain = "fridge_data4H"
-train = InputReader.createInstance(filenameTrain, "timestamp")
+train = InputReader.read(filenameTrain, "timestamp")
 
 train.index = train.index.to_datetime()
 #train.index = train.index.to_pydatetime()
@@ -16,7 +16,7 @@ s = train['power']
 
 
 filenameWeather = "weather_Berlin_Tegel_per_hour4H"
-weather = InputReader.createInstance(filenameWeather, "timestamp")
+weather = InputReader.read(filenameWeather, "timestamp")
 
 weather.index = weather.index.to_datetime()
 weather=weather[(weather.index>="2017.07.01 00:00:00") &( weather.index<"2017.08.01 00:00:00")]

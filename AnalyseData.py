@@ -14,7 +14,7 @@ def checkForZero(x):
 
 
 filenameTrain = "fridge_data"
-train = InputReader.createInstance(filenameTrain, "timestamp")
+train = InputReader.read(filenameTrain, "timestamp")
 #train['power'] = train['power'].replace(float(0), np.nan)
 
 #train = train[1:100000]

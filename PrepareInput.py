@@ -4,6 +4,7 @@ from pandas import Grouper
 import FileWriter
 import numpy as np
 import pandas as pd
+import Constants
 
 
 def hasZerosOrNan(x):
@@ -13,52 +14,50 @@ def hasZerosOrNan(x):
         return True
 
 
-def groupData(fridgeData, weatherData, freq):
+def groupFridgeData(fridgeData, freq):
     fridgeGrouped = fridgeData.groupby(Grouper(freq=freq, axis=0))
     fridgeGrouped = fridgeGrouped.agg(lambda x: np.nan if (hasZerosOrNan(x)) else x.sum())
-    fridgeGrouped['power'] = fridgeGrouped['power'].round(2)
+    fridgeGrouped = fridgeGrouped.round(2)
+    return fridgeGrouped
 
+
+def groupWeatherData(weatherData, freq):
     weatherGrouped = weatherData.groupby(Grouper(freq=freq, axis=0))
     weatherGrouped = weatherGrouped.agg(lambda x: np.nan if (hasZerosOrNan(x)) else x.mean())
-    return [fridgeGrouped, weatherGrouped]
+    weatherGrouped = weatherGrouped.round(2)
+    return weatherGrouped
 
 
-def copyDataToTrain(fridgeGrouped, weatherGrouped):
+def joinData(fridgeGrouped, weatherGrouped):
     train = fridgeGrouped
-    #train.index.name = indexName
     for feature in weatherGrouped.columns:
         train[feature] = weatherGrouped[feature]
         train[feature] = weatherGrouped[feature]
     return train
 
-def blablub(filename):
 
-    fridgeData = InputReader.createInstance(filename, "timestamp")
-    fridgeData = fridgeData[1:10000]
-
-    fridgeData.index = pd.to_datetime(fridgeData.index)
-
-    fridgeData = fridgeData[(fridgeData.index >= "2017.07.01 00:00:00") & (fridgeData.index < "2017.08.01 00:00:00")]
-    return fridgeData
+def readDataFromRange(filename):
+    data = InputReader.read(filename, Constants.indexName)
+    data.index = pd.to_datetime(data.index)
+    data = data[(data.index >= Constants.startDate) & (data.index <= Constants.endDate)]
+    return data
 
 
 def prepareData(freq):
-    filenameFridgeTrain = "fridge_data"
-    fridgeData=blablub(filenameFridgeTrain)
-    fileNameWeatherTrain = "weather_Berlin_Tegel_per_hour"
-    weather = blablub(fileNameWeatherTrain)
+    fridgeData = readDataFromRange(Constants.filenameFridgeTrain)
+    weatherData = readDataFromRange(Constants.fileNameWeatherTrain)
+    fridgeData.index = pd.to_datetime(fridgeData.index)
+    weatherData.index = pd.to_datetime(weatherData.index)
+    fridgeGrouped = groupFridgeData(fridgeData, freq)
+    weatherGrouped = groupWeatherData(weatherData, freq)
+    train = joinData(fridgeGrouped, weatherGrouped)
+    return train
 
-    #indexName = fridgeData.index.name
-    #weather = InputReader.createInstance(fileNameWeatherTrain, "timestamp")
-    #fridgeData.index = pd.to_datetime(fridgeData.index)
-    #weather.index = pd.to_datetime(weather.index)
-    #weather = weather[(weather.index >= "2017.07.01 00:00:00") & (weather.index < "2017.08.01 00:00:00")]
 
-    [groups, groupsWeather] = groupData(fridgeData, weather, freq)
-    train = copyDataToTrain(groups, groupsWeather)
-
-    FileWriter.writePreparedInput(train, "%s%s" % ("fridgeEnergyTrain", freq))
+def savePreparedInput(train):
+    FileWriter.writePreparedInput(train, "%s%s" % (Constants.fileNameTrain, freq))
 
 
 freq = "4H"
-prepareData(freq)
+train = prepareData(freq)
+savePreparedInput(train)
