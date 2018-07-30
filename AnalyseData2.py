@@ -1,10 +1,7 @@
 import InputReader
 import matplotlib.pyplot as plt
-from pandas import Grouper
-import pandas as pd
-import FileWriter
-import seaborn as sns
-#sns.set()
+from sklearn.preprocessing import MinMaxScaler
+scaler = MinMaxScaler()
 
 filenameTrain = "fridge_data4H"
 train = InputReader.read(filenameTrain, "timestamp")
