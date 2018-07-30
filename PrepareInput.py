@@ -1,4 +1,6 @@
-# writes the two input files in one. the freq is given. scaling is done. all periods with any zero entry in power are counted as zero
+# Prepares the input. Groups the data to the given frequence. The two input files are saved in one new file with the name
+# fridgeEnergyTrain%s with s=frequence. From the given power values the energy in the period is calculated. The temperature
+# and humidity are the mean values in the period.
 import InputReader
 from pandas import Grouper
 import FileWriter
@@ -6,6 +8,18 @@ import numpy as np
 import pandas as pd
 import Constants
 from datetime import timedelta
+
+
+def prepareData(freq):
+    fridgeData = readDataFromRange(Constants.filenameFridgeTrain)
+    weatherData = readDataFromRange(Constants.fileNameWeatherTrain)
+    fridgeData.index = pd.to_datetime(fridgeData.index)
+    weatherData.index = pd.to_datetime(weatherData.index)
+    weatherData = addDummyRow(weatherData)
+    fridgeGrouped = groupFridgeData(fridgeData, freq)
+    weatherGrouped = groupWeatherData(weatherData, freq)
+    train = joinData(fridgeGrouped, weatherGrouped)
+    return train
 
 
 def hasZerosOrNan(x):
@@ -20,7 +34,6 @@ def groupFridgeData(fridgeData, freq):
     intervalLength = float(freq.replace("s", ""))
     fridgeGrouped = fridgeGrouped.agg(lambda x: np.nan if (hasZerosOrNan(x)) else x.mean() * intervalLength)
     fridgeGrouped = fridgeGrouped.round(2)
-    print(fridgeGrouped)
     fridgeGrouped.rename({'power': 'energy'}, axis=1, inplace=True)
     return fridgeGrouped
 
@@ -47,35 +60,33 @@ def readDataFromRange(filename):
     return data
 
 
+# not used yet
+def addOfficeIsOpenRow(data):
+    officeIsOpen = pd.DataFrame(data.index)
+    officeIsOpen = data.index.map(lambda s: 1 if s == "2017-07-01" else 0)
+    data['officeIsOpen'] = officeIsOpen
+    return data
+
+
+# dummy row for mean calculation of temperature and humidity
 def addDummyRow(weatherData):
     temperature = weatherData['temperature']
     temperature.index = temperature.index - timedelta(seconds=1)
     humidity = weatherData['humidity']
     humidity.index = humidity.index - timedelta(seconds=1)
-    weatherData2 = pd.DataFrame()
-    weatherData2['temperature'] = temperature
-    weatherData2['humidity'] = humidity
-    weatherData2 = weatherData2.drop(weatherData2.index[0])
-    weatherData = weatherData.append(weatherData2)
+
+    weatherDataDummy = pd.DataFrame()
+    weatherDataDummy['temperature'] = temperature
+    weatherDataDummy['humidity'] = humidity
+    weatherDataDummy = weatherDataDummy.drop(weatherDataDummy.index[0])
+    weatherData = weatherData.append(weatherDataDummy)
     return weatherData
-
-
-def prepareData(freq):
-    fridgeData = readDataFromRange(Constants.filenameFridgeTrain)
-    weatherData = readDataFromRange(Constants.fileNameWeatherTrain)
-    fridgeData.index = pd.to_datetime(fridgeData.index)
-    weatherData.index = pd.to_datetime(weatherData.index)
-    weatherData = addDummyRow(weatherData)
-    fridgeGrouped = groupFridgeData(fridgeData, freq)
-    weatherGrouped = groupWeatherData(weatherData, freq)
-    train = joinData(fridgeGrouped, weatherGrouped)
-    return train
 
 
 def savePreparedInput(train):
     FileWriter.writePreparedInput(train, "%s%s" % (Constants.fileNameTrain, freq))
 
 
-freq = "14400s"
-train = prepareData(freq)
+frequence = "14400s"
+train = prepareData(frequence)
 savePreparedInput(train)

@@ -1,47 +1,72 @@
 import InputReader
-from matplotlib import pyplot
-from pandas import Grouper
+import matplotlib.pyplot as plt
 import pandas as pd
-import FileWriter
-import numpy as np
+import MinMaxScaler
+import Constants
+from datetime import timedelta
+from datetime import datetime
+
+def plot24Hour():
+    filenameTrain = "fridgeEnergyTrain24H"
+    train = InputReader.read(filenameTrain, "timestamp")
+    train.index = pd.to_datetime(train.index)
+
+    train_scaled = MinMaxScaler.scale(train)
+    f, ax = plt.subplots(1, 1)
+    ax.legend()
+    plt.plot(train_scaled)
+    plt.show()
+
+def plotDifferentFrequences():
+    frequences = ["3600s", "14400s", "28800s", "86400s"]
+    for freq in frequences:
+        train = InputReader.read("fridgeEnergyTrain%s" % (freq), "timestamp")
+        train.index = pd.to_datetime(train.index)
+        train_scaled = MinMaxScaler.scale(train)
+        plt.plot(train_scaled)
+        plt.title(freq)
+        plt.show()
+
+def calcCorrelation():
+    frequences = ["3600s","14400s","28800s","86400s"]
+    for freq in frequences:
+        print("Correlation for frequence %s:" %(freq))
+        train = InputReader.read("fridgeEnergyTrain%s" % (freq), "timestamp")
+        correlation = train.corr().round(2)
+        print(correlation)
+        print()
 
 
-def checkForZero(x):
-    if (x.min()>0):
-        return False
-    else:
-        return True
+def plotEachDay():
+    filenameTrain = "fridgeEnergyTrain14400s"
+    train = InputReader.read(filenameTrain, "timestamp")
+    train.index = pd.to_datetime(train.index)
+    print(train)
+    startDate=datetime.strptime(Constants.startDate,"%Y-%m-%d %H:%M:%S")
+    endData1=datetime.strptime(Constants.endDate,"%Y-%m-%d %H:%M:%S")
+    print(startDate)
+
+    day=timedelta(days=1)
+    endDate=startDate+day
+    print(endDate)
+    while startDate<endData1:
+
+        trainDay=train[(train.index>=startDate) & (train.index <=endDate)]
+        trainDay=MinMaxScaler.scale(trainDay)
+        plt.plot(trainDay)
+        plt.title(startDate)
+        plt.show()
+        startDate=startDate+day
+        endDate=endDate+day
 
 
-filenameTrain = "fridge_data"
-train = InputReader.read(filenameTrain, "timestamp")
-#train['power'] = train['power'].replace(float(0), np.nan)
 
-#train = train[1:100000]
 
-# print(train)
-# print(train.isnull().sum())
-# print(train.info())
+#plotEachDay()
+plotEachDay()
+#plotDifferentFrequences()
+calcCorrelation()
+#plot24Hour()
 
-# s = train['power']
-# print(type(s))
 
-# s.plot()
-# pyplot.show()
 
-train.index = train.index.to_datetime()
-freq = "4H"
-
-groups = train.groupby(Grouper(freq=freq, axis=0))
-groups = groups.agg(lambda x: np.nan if (checkForZero(x)) else x.sum())
-
-FileWriter.writeToFile(groups, "%s%s" % (filenameTrain, freq))
-print(type(groups))
-
-print(groups)
-# years = pd.DataFrame()
-# for name, group in groups:
-#    years[name.year] = group.values
-# s=groups['power']
-# s.plot()
-# pyplot.show()
