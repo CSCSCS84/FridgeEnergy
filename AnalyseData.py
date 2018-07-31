@@ -58,7 +58,7 @@ def plotEachDay():
         endDate = endDate + oneDay
 
 
-create24HPlot()
-plotDifferentFrequences()
-calcCorrelation()
-plotEachDay()
+#create24HPlot()
+#plotDifferentFrequences()
+#calcCorrelation()
+#plotEachDay()

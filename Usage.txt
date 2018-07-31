@@ -1,0 +1,5 @@
+Prediction: Run PredictionRunner function run(). Output is written into Output/prediction_%s with s=frequence
+AnalyseData.py: Some plots are created in AnalyseData.
+PrepareInput.py: Prepares the input
+RegressionTester: Tests different regression algorithms. R2 score is used on a splitted train dataset.
+

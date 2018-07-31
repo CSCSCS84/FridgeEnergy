@@ -1,4 +1,5 @@
 # short script for testing the prepared input
+#Note: some files might not be created. Use PrepareInput to create file
 import Constants
 import InputReader
 import numpy as np

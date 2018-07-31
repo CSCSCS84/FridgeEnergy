@@ -1,3 +1,6 @@
+# Runs a prediction for the energy that the fridge is consuming. A LinearRegression model is taken because this model had
+# the best R2 score on the train data set. Period length in the dataset is 14400 seconds = 4 Hours, the values are summed up.
+# The Result is written to file Output/prediction_%s with s=frequence .
 import InputReader
 import PrepareInput
 from sklearn.linear_model import LinearRegression
@@ -9,8 +12,10 @@ import Constants
 
 def run():
     freq = "14400s"
+    print("Prepare Input")
     trainGrouped = prepareTrain(freq)
     testGrouped = prepareTest(freq)
+    print("Run regression algorithm \n")
     yPrediction = runRegression(trainGrouped, testGrouped)
     predictionGrouped = groupPrediction(testGrouped, yPrediction)
     writeToFile(predictionGrouped, freq)
@@ -58,4 +63,5 @@ def prepareTest(freq):
 
 
 prediction = run()
+print("Energy (in Joule) Prediction for 2017-08-02 to 2017-08-11:")
 print(prediction)
