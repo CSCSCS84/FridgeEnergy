@@ -83,10 +83,12 @@ def addDummyRow(weatherData):
     return weatherData
 
 
-def savePreparedInput(train):
-    FileWriter.writePreparedInput(train, "%s%s" % (Constants.fileNameTrain, freq))
+def savePreparedInput(train, freq):
+    FileWriter.writePreparedInput(train, "%s_%s" % (Constants.fileNameTrain, freq))
 
+def run():
+    frequence = "14400s"
+    train = prepareData(frequence)
+    savePreparedInput(train, frequence)
 
-frequence = "14400s"
-train = prepareData(frequence)
-savePreparedInput(train)
+run()

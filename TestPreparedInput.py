@@ -5,7 +5,7 @@ import numpy as np
 
 
 def test60sData():
-    filename = "fridgeEnergyTrain60s"
+    filename = "fridgeEnergyTrain_60s"
     data = InputReader.read(filename, Constants.indexName)
 
     if data.loc["2017-07-01 00:00:00"]['temperature'] != 14.5:
@@ -24,7 +24,7 @@ def test60sData():
         print("Error in %s" % (filename))
 
 def test3600sData():
-    filename = "fridgeEnergyTrain3600s"
+    filename = "fridgeEnergyTrain_3600s"
     data = InputReader.read(filename, Constants.indexName)
 
     if data.loc["2017-07-01 00:00:00"]['energy'] != 10146.35:
@@ -43,7 +43,7 @@ def test3600sData():
         print("Error in %s" % (filename))
 
 def test14400sData():
-    filename = "fridgeEnergyTrain14400s"
+    filename = "fridgeEnergyTrain_14400s"
     data = InputReader.read(filename, Constants.indexName)
     if data.loc["2017-07-01 00:00:00"]['energy'] != 282273.06:
         print("Error in %s" % (filename))

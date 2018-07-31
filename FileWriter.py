@@ -4,7 +4,7 @@ import definitions
 def writeToFile(input, filename):
     ROOT_DIR = definitions.ROOT_DIR
     file = "%s/Output/%s.csv" % (ROOT_DIR, filename)
-    input.to_csv(file, header='timestamp \t power', sep=',')
+    input.to_csv(file, header='timestamp \t energy', sep=',')
 
 
 def writePreparedInput(train, filename):
